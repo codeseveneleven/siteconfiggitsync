@@ -11,6 +11,8 @@
  * The TYPO3 project - inspiring people to share!
  */
 
-$GLOBALS['TYPO3_CONF_VARS']['SYS']['Objects'][\TYPO3\CMS\Core\Configuration\SiteConfiguration::class] = [
-    'className' => \Code711\SiteConfigGitSync\Configuration\SiteConfiguration::class,
-];
+namespace Code711\SiteConfigGitSync\Domain\Service;
+
+class GitlabApiService
+{
+}

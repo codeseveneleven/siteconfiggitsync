@@ -1,0 +1,14 @@
+# cat=basic//10; type=string; label=Gitlab URL to the repository (https//git.mycompany.com/customer/sitepackage)
+gitlabserver =
+
+# cat=basic//20; type=string; label=Gitlab API Auth token
+http_auth_token =
+
+# cat=basic//30; type=user[Code711\SiteConfigGitSync\Backend\BaseBranchSelector->render]; label=The production branch to create merge-requests from (e.q. main)
+main_branch =
+
+# cat=basic//40; type=string; label=Branch naming Template, sprintf wrapped. First argument is the site identifier
+branch_naming_template = automated-siteconfig-update-%s
+
+# cat=basic//50; type=text; label=Commit message, sprintf wrapped. First argument is the site identifier, second argument is the username of the backend user doing the change if available
+commit_message = Site config update in Site %s by %s
