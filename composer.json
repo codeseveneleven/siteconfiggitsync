@@ -56,7 +56,16 @@
             "mkdir -p .Build/public/typo3conf/ext/",
             "[ -L .Build/public/typo3conf/ext/siteconfiggitsync ] || ln -snvf ../../../../. .Build/public/typo3conf/ext/siteconfiggitsync; exit 0"
         ],
+		"pre-install-cmd": [
+			"@add-local-git-config"
+		],
+		"pre-update-cmd": [
+			"@add-local-git-config"
+		],
+		"add-local-git-config": "git config --local include.path ../.gitconfig",
 		"cmscacheflush": "@php vendor/bin/typo3cms cache:flush",
-		"csfixer": "@php vendor/bin/php-cs-fixer fix"
+		"csfixer": "@php vendor/bin/php-cs-fixer fix",
+		"psalm": "@php ./vendor/bin/psalm --no-cache  --show-info=true --php-version=8.1",
+		"phpstan": "@php ./vendor/bin/phpstan analyze -l 9 ./Classes"
     }
 }
