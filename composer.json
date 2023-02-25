@@ -1,0 +1,62 @@
+{
+    "name": "code711/siteconfiggitsync",
+    "description": "Sync changes in config/site back into your git repository",
+    "type": "typo3-cms-extension",
+    "config": {
+        "platform": {
+            "php": "8.1.5"
+        },
+        "allow-plugins": {
+            "typo3/cms-composer-installers": true,
+            "typo3/class-alias-loader": true,
+            "php-http/discovery": true
+        }
+    },
+    "require": {
+        "php": "7.4.*||8.0.*||8.1.*",
+        "typo3/cms-core": "11.5.*",
+		"m4tthumphrey/php-gitlab-api": "^11.5"
+    },
+    "require-dev": {
+        "typo3/cms-backend": "^11.5",
+        "typo3/cms-frontend": "^11.5",
+        "typo3/cms-tstemplate": "^11.5",
+        "typo3/cms-install": "^11.5",
+		"friendsoftypo3/phpstan-typo3": "^0.9",
+		"vimeo/psalm": "^4.10",
+		"typo3/cms-lowlevel": "^11.5",
+		"helhum/typo3-console": "*",
+		"typo3/coding-standards": "^0.5"
+    },
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Code711\\SiteConfigGitSync\\": "Classes/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Frank Berger",
+            "email": "fberger@code711.de"
+        }
+    ],
+    "extra": {
+        "typo3/cms": {
+            "extension-key": "siteconfiggitsync",
+            "cms-package-dir": "{$vendor-dir}/typo3/cms",
+            "web-dir": ".Build/public"
+        }
+    },
+    "scripts": {
+        "pre-autoload-dump": [
+            "mkdir -p .Build/public/typo3conf/ext/",
+            "[ -L .Build/public/typo3conf/ext/siteconfiggitsync ] && rm .Build/public/typo3conf/ext/siteconfiggitsync; exit 0"
+        ],
+        "post-autoload-dump": [
+            "mkdir -p .Build/public/typo3conf/ext/",
+            "[ -L .Build/public/typo3conf/ext/siteconfiggitsync ] || ln -snvf ../../../../. .Build/public/typo3conf/ext/siteconfiggitsync; exit 0"
+        ],
+		"cmscacheflush": "@php vendor/bin/typo3cms cache:flush",
+		"csfixer": "@php vendor/bin/php-cs-fixer fix"
+    }
+}
