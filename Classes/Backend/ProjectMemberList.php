@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /*
  * This file is part of the TYPO3 project.
  *
@@ -20,7 +18,7 @@ use Gitlab\Exception\RuntimeException;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
-class BaseBranchSelector
+class ProjectMemberList
 {
     public function render(array $parameter = []): string
     {
@@ -30,15 +28,17 @@ class BaseBranchSelector
 
         if (!empty($config['gitlabserver']) && !empty($config['http_auth_token'])) {
             try {
-                $branches = GitApiServiceFactory::get()->getBranches();
+                $members = GitApiServiceFactory::get()->getMembers();
 
                 $out = sprintf('<select name="%1$s" id="em-%1$s">', $parameter['fieldName']);
-                foreach ($branches as $branch) {
-                    $out .= sprintf('<option value="%1$s" %3$s>%1$s (Last commit: %2$s)</option>', $branch['name'], $branch['commit']['created_at'], $branch['name'] === $parameter['fieldValue'] ? 'selected' : '');
+                $out .= '<option value="0">do not assign to a user</option>';
+
+                foreach ($members as $member) {
+                    $out .= sprintf('<option value="%1$s" %3$s>%2$s</option>', $member['id'], $member['name'] . ' (' . $member['username'] . ')', $member['id'] === (int)$parameter['fieldValue'] ? 'selected' : '');
                 }
                 $out .=  '</select>';
             } catch (RuntimeException $e) {
-                $out = '<p>Git server says: ' . $e->getMessage() . '</p>';
+                $out = '<p>Git Server says: ' . $e->getMessage() . '</p>';
             } catch (\InvalidArgumentException $e) {
                 $out = '<p>' . $e->getMessage() . '</p>';
             }

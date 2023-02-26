@@ -10,5 +10,11 @@ main_branch =
 # cat=basic//40; type=string; label=Branch naming Template, sprintf wrapped. First argument is the site identifier
 branch_naming_template = automated-siteconfig-update-%s
 
-# cat=basic//50; type=text; label=Commit message, sprintf wrapped. First argument is the site identifier, second argument is the username of the backend user doing the change if available
-commit_message = Site config update in Site %s by %s
+# cat=basic//50; type=text; label=Commit message, sprintf wrapped. First argument is the site identifier, second argument is the username of the backend user doing the change if available, third argument additional information about the action performed
+commit_message = [skip ci] Site config %3$s in Site %1$s by %2$s
+
+# cat=basic//50; type=text; label=Merge request message, sprintf wrapped. First argument is the site identifier, second argument is the username of the backend user doing the change if available, third argument additional information about the action performed
+mergerequest_message = [skip ci] Please merge site config %3$s in Site %1$s by %2$s
+
+# cat=basic//60; type=user[Code711\SiteConfigGitSync\Backend\ProjectMemberList->render]; label=Who to assign a merge request
+mergerequest_assign = 0
