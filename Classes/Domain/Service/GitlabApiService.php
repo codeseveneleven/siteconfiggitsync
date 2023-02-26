@@ -21,6 +21,7 @@ use Gitlab\Exception\RuntimeException;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
+use TYPO3\CMS\Core\Context\Context;
 use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
@@ -31,6 +32,9 @@ class GitlabApiService implements GitApiServiceInterface
      */
     protected array $config;
 
+    /**
+     * @var array<int,array<string,string|int>>
+     */
     protected array $branchescache = [];
 
     public function __construct()
@@ -45,16 +49,16 @@ class GitlabApiService implements GitApiServiceInterface
     public function getHost(): string
     {
         $uri = \parse_url($this->config['gitlabserver']);
-        return $uri['scheme'] . '://' . $uri['host'] . '/';
+        if (isset($uri['host']) && isset($uri['scheme'])) {
+            return $uri['scheme'] . '://' . $uri['host'] . '/';
+        }
+        return $this->config['gitlabserver'];
     }
     public function getProject(): string
     {
-        return trim(\parse_url($this->config['gitlabserver'], PHP_URL_PATH), '/');
+        return trim((string)\parse_url($this->config['gitlabserver'], PHP_URL_PATH), '/');
     }
 
-    /**
-     * @return array
-     */
     public function getBranches(): array
     {
         if (empty($this->branchescache)) {
@@ -110,8 +114,10 @@ class GitlabApiService implements GitApiServiceInterface
         if ($GLOBALS['BE_USER'] instanceof BackendUserAuthentication) {
             $uid = $GLOBALS['BE_USER']->getOriginalUserIdWhenInSwitchUserMode();
             if ($uid === null) {
-                $uid = $GLOBALS['BE_USER']->user['uid'];
+                $context = GeneralUtility::makeInstance(Context::class);
+                $uid = $context->getPropertyFromAspect('backend.user', 'id');
             }
+            /** @var array{uid: int, username: string, email: ?string} $user */
             $user = BackendUtility::getRecord('be_users', $uid);
             $author['username']=$user['username'];
             if ($user['email']) {
@@ -162,7 +168,7 @@ class GitlabApiService implements GitApiServiceInterface
         try {
             $raw = $client->repositoryFiles()->getRawFile($this->getProject(), $oldfilename, $branch);
         } catch (RuntimeException $e) {
-            return $this->commitFile($newfilename, \file_get_contents(Environment::getProjectPath() . '/' . $newfilename), $commitmessage, $branch);
+            return $this->commitFile($newfilename, (string)\file_get_contents(Environment::getProjectPath() . '/' . $newfilename), $commitmessage, $branch);
         }
         $author = $this->getAuthor();
 
@@ -179,7 +185,7 @@ class GitlabApiService implements GitApiServiceInterface
             //            'author_email'=>$author['email'],
             //            'author_name'=>$author['username'],
             //        ] );
-            $this->commitFile($newfilename, \file_get_contents(Environment::getProjectPath() . '/' . $newfilename), $commitmessage, $branch);
+            $this->commitFile($newfilename, (string)\file_get_contents(Environment::getProjectPath() . '/' . $newfilename), $commitmessage, $branch);
             $client->repositoryFiles()->deleteFile($this->getProject(), [
                 'file_path'=>$oldfilename,
                 'branch'=>$branch,
@@ -194,7 +200,7 @@ class GitlabApiService implements GitApiServiceInterface
         return true;
     }
 
-    public function deleteFile($filename, $branch, $commitmessage): bool
+    public function deleteFile(string $filename, string $branch, string $commitmessage): bool
     {
         $author = $this->getAuthor();
         $filename = trim($filename, '/');

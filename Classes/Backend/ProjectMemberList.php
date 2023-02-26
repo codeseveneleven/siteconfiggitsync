@@ -22,6 +22,13 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class ProjectMemberList
 {
+    /**
+     * @param array<string,string|int> $parameter
+     *
+     * @return string
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
+     */
     public function render(array $parameter = []): string
     {
         $config = GeneralUtility::makeInstance(ExtensionConfiguration::class)->get('siteconfiggitsync');
@@ -36,7 +43,7 @@ class ProjectMemberList
                 $out .= '<option value="0">do not assign to a user</option>';
 
                 foreach ($members as $member) {
-                    $out .= sprintf('<option value="%1$s" %3$s>%2$s</option>', $member['id'], $member['name'] . ' (' . $member['username'] . ')', $member['id'] === (int)$parameter['fieldValue'] ? 'selected' : '');
+                    $out .= sprintf('<option value="%1$s" %3$s>%2$s</option>', $member['id'], $member['name'] . ' (' . $member['username'] . ')', (int)$member['id'] === (int)$parameter['fieldValue'] ? 'selected' : '');
                 }
                 $out .=  '</select>';
             } catch (RuntimeException $e) {

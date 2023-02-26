@@ -20,6 +20,13 @@ use TYPO3\CMS\Core\Core\Environment;
 
 class SiteConfiguration extends \TYPO3\CMS\Core\Configuration\SiteConfiguration
 {
+    /**
+     * @param string $siteIdentifier
+     * @param array<string,mixed> $configuration
+     * @param bool $protectPlaceholders
+     *
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\SiteConfigurationWriteException
+     */
     public function write(string $siteIdentifier, array $configuration, bool $protectPlaceholders = false): void
     {
         parent::write($siteIdentifier, $configuration, $protectPlaceholders);
@@ -31,7 +38,7 @@ class SiteConfiguration extends \TYPO3\CMS\Core\Configuration\SiteConfiguration
         $message = $git->getCommitMessage($siteIdentifier, 'create or update');
         if ($git->createBranch($branch)) {
             $filebase = \str_replace(Environment::getProjectPath(), '', $fileName);
-            if ($git->commitFile($filebase, \file_get_contents($fileName), $message, $branch)) {
+            if ($git->commitFile($filebase, (string)\file_get_contents($fileName), $message, $branch)) {
                 $git->createMergeRequest($siteIdentifier, $branch, 'create or update');
             }
         }

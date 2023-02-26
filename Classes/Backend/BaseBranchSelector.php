@@ -22,6 +22,13 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class BaseBranchSelector
 {
+    /**
+     * @param array<string,string|int> $parameter
+     *
+     * @return string
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException
+     * @throws \TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException
+     */
     public function render(array $parameter = []): string
     {
         $config = GeneralUtility::makeInstance(ExtensionConfiguration::class)->get('siteconfiggitsync');

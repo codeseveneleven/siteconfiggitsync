@@ -19,19 +19,34 @@ interface GitApiServiceInterface
 {
     public function getHost(): string;
     public function getProject(): string;
+
+    /**
+     * @return array<int,array<string,mixed>>
+     */
     public function getBranches(): array;
 
     public function hasBranch(string $branch): bool;
+    /**
+     * @return array<string,mixed>|null
+     */
     public function getBranch(string $branch): ?array;
     public function getBranchName(string $identifier): string;
+
+    /**
+     * @return array<string,string>
+     */
     public function getAuthor(): array;
     public function getCommitMessage(string $identifier, string $addtional_info = ''): string;
     public function getMergeRequestMessage(string $identifier, string $addtional_info = ''): string;
 
     public function createBranch(string $newbranch): bool;
     public function moveFile(string $oldfilename, string $newfilename, string $commitmessage, string $branch): bool;
-    public function deleteFile($filename, $branch, $commitmessage): bool;
+    public function deleteFile(string $filename, string $branch, string $commitmessage): bool;
     public function commitFile(string $filename, string $filecontent, string $commitmessage, string $branch): bool;
     public function createMergeRequest(string $identifier, string $branch, string $additional_info=''): void;
+
+    /**
+     * @return array<int,array<string,string>>
+     */
     public function getMembers(): array;
 }
