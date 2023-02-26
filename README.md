@@ -19,7 +19,7 @@ after installing this extension with <pre>composer req code711/siteconfiggitsync
 
 This is done in your GitLab in your Project under 'Settings->Access Token'. Developer Permissions are needed because only from this level on Branches can be created and Merge-requests can be issued.
 
-![Gitlab Backend](https://raw.githubusercontent.com/codeseveneleven/typo3-siteconfiggitsync/main/Documentation/gitlab.png)
+![Gitlab Backend](https://github.com/codeseveneleven/siteconfiggitsync/raw/main/Documentation/gitlab.png)
 
 In the field 'Token name' enter something meaningfull for this task, as it will be written next to commits or merge-requests. For example 'External Site change from TYPO3'.
 
@@ -31,11 +31,11 @@ And for the scope select 'api'. The other scopes are not enough for the tasks we
 
 after pressing the 'Create project access token' button you will be given a series of alphanumeric character. Copy this string of character. This is your token.
 
-![New Token](https://raw.githubusercontent.com/codeseveneleven/typo3-siteconfiggitsync/main/Documentation/newtoken.png)
+![New Token](https://github.com/codeseveneleven/siteconfiggitsync/raw/main/Documentation/newtoken.png)
 
 In your TYPO3 backend navigate to Settings->Extension Configuration and open the accordion for the siteconfiggitsync extension:
 
-![Extension Config](https://raw.githubusercontent.com/codeseveneleven/typo3-siteconfiggitsync/main/Documentation/extensionconfig.png)
+![Extension Config](https://github.com/codeseveneleven/siteconfiggitsync/raw/main/Documentation/extensionconfig.png)
 
 In the field gitlab url add the complete URL to your projects repository, without any .git. Just as it is in your browser. for example <pre>https://gitlab.com/mycompany/customerproject </pre>
 
