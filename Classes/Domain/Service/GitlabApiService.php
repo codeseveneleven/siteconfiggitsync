@@ -42,7 +42,7 @@ class GitlabApiService implements GitApiServiceInterface
         $this->config = GeneralUtility::makeInstance(ExtensionConfiguration::class)->get('siteconfiggitsync');
 
         if (empty($this->config['gitlabserver']) || empty($this->config['http_auth_token'])) {
-            throw new \InvalidArgumentException('configure EXT:siteconfiggitsync first', 1677369373);
+            throw new \InvalidArgumentException('EXT:siteconfiggitsync is not configured yet!!!', 1677369373);
         }
     }
 
