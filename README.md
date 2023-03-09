@@ -13,6 +13,10 @@ This extension aims to alleviate this problem by pushing those changes back to y
 
 There is no git binary on the server needed, everything is done through the GitLab API. Right now only GitLab is supported, but it can be selfhosted or on gitlab.com.
 
+## Changelog
+- 0.10.0 Externalised the XCLASS of the SiteConfiguration Class to [EXT:siteconfigurationevents](https://extensions.typo3.org/extension/siteconfigurationevents). Composer installations should pull this extension automatically as a dependency. Refactored the git related actions into event listeners.
+- 0.9.x Initial release
+
 ## Setup / Installation
 
 after installing this extension with <pre>composer req code711/siteconfiggitsync</pre> you will need to create an API Token in your GitLab Project Page with at least 'Developer' permissions.
