@@ -1,6 +1,7 @@
 # TYPO3 Site config - git synchronisation
 
 [![Latest Stable Version](https://poser.pugx.org/code711/siteconfiggitsync/v/stable.svg)](https://extensions.typo3.org/code711/siteconfiggitsync/)
+[![TYPO3 12](https://img.shields.io/badge/TYPO3-12-orange.svg)](https://get.typo3.org/version/12)
 [![TYPO3 11](https://img.shields.io/badge/TYPO3-11-orange.svg)](https://get.typo3.org/version/11)
 [![Total Downloads](https://poser.pugx.org/code711/siteconfiggitsync/d/total.svg)](https://packagist.org/packages/code711/siteconfiggitsync)
 [![Monthly Downloads](https://poser.pugx.org/code711/siteconfiggitsync/d/monthly)](https://packagist.org/packages/code711/siteconfiggitsync)
@@ -14,6 +15,8 @@ This extension aims to alleviate this problem by pushing those changes back to y
 There is no git binary on the server needed, everything is done through the GitLab API. Right now only GitLab is supported, but it can be selfhosted or on gitlab.com.
 
 ## Changelog
+- 1.0.1 Fix README.md
+- 1.0.0 Support TYPO3 12
 - 0.10.0 Externalised the XCLASS of the SiteConfiguration Class to [EXT:siteconfigurationevents](https://extensions.typo3.org/extension/siteconfigurationevents). Composer installations should pull this extension automatically as a dependency. Refactored the git related actions into event listeners.
 - 0.9.x Initial release
 
