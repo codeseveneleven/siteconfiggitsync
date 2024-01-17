@@ -15,10 +15,21 @@ This extension aims to alleviate this problem by pushing those changes back to y
 There is no git binary on the server needed, everything is done through the GitLab API. Right now only GitLab is supported, but it can be selfhosted or on gitlab.com.
 
 ## Changelog
-- 1.0.1 Fix README.md
-- 1.0.0 Support TYPO3 12
-- 0.10.0 Externalised the XCLASS of the SiteConfiguration Class to [EXT:siteconfigurationevents](https://extensions.typo3.org/extension/siteconfigurationevents). Composer installations should pull this extension automatically as a dependency. Refactored the git related actions into event listeners.
-- 0.9.x Initial release
+
+#### 1.0.3
+- fixed issue [#1](https://github.com/codeseveneleven/siteconfiggitsync/issues/1)
+- fixed issue reading the user-list in the extension configuration interface when a project is not part of a group
+- added LoggerAwareInterface to AfterConfigurationWriteListener 
+
+#### 1.0.1 
+Fix README.md
+
+#### 1.0.0 
+Support TYPO3 12
+
+#### 0.10.0 
+Externalised the XCLASS of the SiteConfiguration Class to [EXT:siteconfigurationevents](https://extensions.typo3.org/extension/siteconfigurationevents). Composer installations should pull this extension automatically as a dependency. Refactored the git related actions into event listeners.
+#### 0.9.x Initial release
 
 ## Setup / Installation
 

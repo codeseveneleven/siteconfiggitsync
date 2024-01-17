@@ -17,16 +17,22 @@ namespace Code711\SiteConfigGitSync\EventListeners;
 
 use Code711\SiteConfigGitSync\Factory\GitApiServiceFactory;
 use Code711\SiteConfigurationEvents\Events\AfterSiteConfigurationWriteEvent;
+use function file_get_contents;
+use InvalidArgumentException;
+use Psr\Log\LoggerAwareInterface;
+use Psr\Log\LoggerAwareTrait;
+use function str_replace;
 use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Messaging\FlashMessage;
 use TYPO3\CMS\Core\Messaging\FlashMessageService;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
-class AfterConfigurationWriteListener
+class AfterConfigurationWriteListener implements LoggerAwareInterface
 {
+    use LoggerAwareTrait;
     public function __invoke(AfterSiteConfigurationWriteEvent $event): void
     {
-        if (Environment::getContext()->isProduction()) {
+        if (Environment::getContext()->isProduction() || Environment::getContext()->isDevelopment()) {
             try {
                 $siteIdentifier = $event->getSiteIdentifier();
                 $configFileName = 'config.yaml';
@@ -38,23 +44,25 @@ class AfterConfigurationWriteListener
                 $branch  = $git->getBranchName($siteIdentifier);
                 $message = $git->getCommitMessage($siteIdentifier, 'create or update');
                 if ($git->createBranch($branch)) {
-                    $filebase = \str_replace(Environment::getProjectPath(), '', $fileName);
-                    if ($git->commitFile($filebase, (string)\file_get_contents($fileName), $message, $branch)) {
+                    $filebase = str_replace(Environment::getProjectPath(), '', $fileName);
+                    if ($git->commitFile($filebase, (string)file_get_contents($fileName), $message, $branch)) {
                         $git->createMergeRequest($siteIdentifier, $branch, 'create or update');
                     }
                 }
-            } catch (\InvalidArgumentException $e) {
-                $message = GeneralUtility::makeInstance(
-                    FlashMessage::class,
-                    $e->getMessage(),
-                    '',
-                    FlashMessage::WARNING,
-                    true
-                );
-
-                $flashMessageService = GeneralUtility::makeInstance(FlashMessageService::class);
-                $messageQueue        = $flashMessageService->getMessageQueueByIdentifier();
-                $messageQueue->addMessage($message);
+            } catch (InvalidArgumentException $e) {
+                $this->logger->alert($e->getMessage() . ' ' . $e->getCode());
+                if (!Environment::isCli()) {
+                    $message = GeneralUtility::makeInstance(
+                        FlashMessage::class,
+                        $e->getMessage(),
+                        '',
+                        FlashMessage::WARNING,
+                        true
+                    );
+                    $flashMessageService = GeneralUtility::makeInstance(FlashMessageService::class);
+                    $messageQueue        = $flashMessageService->getMessageQueueByIdentifier();
+                    $messageQueue->addMessage($message);
+                }
             }
         }
     }
