@@ -43,7 +43,7 @@ interface GitApiServiceInterface
     public function moveFile(string $oldfilename, string $newfilename, string $commitmessage, string $branch): bool;
     public function deleteFile(string $filename, string $branch, string $commitmessage): bool;
     public function commitFile(string $filename, string $filecontent, string $commitmessage, string $branch): bool;
-    public function createMergeRequest(string $identifier, string $branch, string $additional_info=''): void;
+    public function createMergeRequest(string $identifier, string $branch, string $additional_info = ''): void;
 
     /**
      * @return array<int,array<string,string>>

@@ -1,2 +1,2 @@
-includes:
-    - vendor/friendsoftypo3/phpstan-typo3/extension.neon
+#includes:
+#    - vendor/friendsoftypo3/phpstan-typo3/extension.neon

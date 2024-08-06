@@ -4,7 +4,7 @@
     "type": "typo3-cms-extension",
     "config": {
         "platform": {
-            "php": "8.1.5"
+            "php": "8.3.5"
         },
         "allow-plugins": {
             "typo3/cms-composer-installers": true,
@@ -14,20 +14,18 @@
     },
     "require": {
         "php": "7.4.*||8.0.*||8.1.*||8.2.*||8.3.*",
-        "typo3/cms-core": "^11.5||^12.0",
+        "typo3/cms-core": "^11.5||^12.0||^13.0",
 		"m4tthumphrey/php-gitlab-api": "^11.5",
 		"code711/siteconfigurationevents": "^1.0"
     },
     "require-dev": {
-        "typo3/cms-backend": "^12.0",
-        "typo3/cms-frontend": "^12.0",
-        "typo3/cms-tstemplate": "^12.0",
-        "typo3/cms-install": "^12.0",
-		"friendsoftypo3/phpstan-typo3": "^0.9",
-		"vimeo/psalm": "^4.10",
-		"typo3/cms-lowlevel": "^12.0",
-		"helhum/typo3-console": "*",
-		"typo3/coding-standards": "^0.5"
+        "typo3/cms-backend": "^13.0",
+        "typo3/cms-frontend": "^13.0",
+        "typo3/cms-tstemplate": "^13.0",
+        "typo3/cms-install": "^13.0",
+        "saschaegerer/phpstan-typo3": "*",
+		"typo3/cms-lowlevel": "^13.0",
+		"typo3/coding-standards": "*"
     },
     "license": "MIT",
     "autoload": {
@@ -50,12 +48,17 @@
     },
     "scripts": {
         "pre-autoload-dump": [
-            "mkdir -p .Build/public/typo3conf/ext/",
+
+          "[ -L vendor/code711/siteconfiggitsync ] || ln -snvf .  vendor/code711/siteconfiggitsync",
+
+          "mkdir -p .Build/public/typo3conf/ext/",
             "[ -L .Build/public/typo3conf/ext/siteconfiggitsync ] && rm .Build/public/typo3conf/ext/siteconfiggitsync; exit 0"
         ],
         "post-autoload-dump": [
-            "mkdir -p .Build/public/typo3conf/ext/",
-            "[ -L .Build/public/typo3conf/ext/siteconfiggitsync ] || ln -snvf ../../../../. .Build/public/typo3conf/ext/siteconfiggitsync; exit 0"
+          "[ -L vendor/code711/siteconfiggitsync ] || ln -snvf .  vendor/code711/siteconfiggitsync",
+          "mkdir -p .Build/public/typo3conf/ext/",
+          "[ -L .Build/public/typo3conf/ext/siteconfiggitsync ] || ln -snvf ../../../../. .Build/public/typo3conf/ext/siteconfiggitsync; exit 0"
+
         ],
 		"pre-install-cmd": [
 			"@add-local-git-config"
@@ -66,7 +69,6 @@
 		"add-local-git-config": "git config --local include.path ../.gitconfig",
 		"cmscacheflush": "@php vendor/bin/typo3cms cache:flush",
 		"csfixer": "@php vendor/bin/php-cs-fixer fix",
-		"psalm": "@php ./vendor/bin/psalm --no-cache  --show-info=true --php-version=8.1",
 		"phpstan": "@php ./vendor/bin/phpstan analyze -l 9 ./Classes"
     }
 }

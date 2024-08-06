@@ -10,3 +10,7 @@
  *
  * The TYPO3 project - inspiring people to share!
  */
+
+if (!isset($GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['siteconfiggitsync'])) {
+    $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['siteconfiggitsync'] = [];
+}

@@ -15,16 +15,10 @@ declare(strict_types=1);
 
 namespace Code711\SiteConfigGitSync\Domain\Service;
 
-use function array_merge_recursive;
 use Code711\SiteConfigGitSync\Interfaces\GitApiServiceInterface;
-use Exception;
-use function file_get_contents;
 use Gitlab\Client;
 use Gitlab\Exception\RuntimeException;
 use Gitlab\Exception\ValidationFailedException;
-use InvalidArgumentException;
-use function parse_url;
-use function sprintf;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
@@ -47,15 +41,14 @@ class GitlabApiService implements GitApiServiceInterface
     public function __construct()
     {
         $this->config = GeneralUtility::makeInstance(ExtensionConfiguration::class)->get('siteconfiggitsync');
-
         if (empty($this->config['gitlabserver']) || empty($this->config['http_auth_token'])) {
-            throw new InvalidArgumentException('EXT:siteconfiggitsync is not configured yet!!!', 1677369373);
+            throw new \InvalidArgumentException('EXT:siteconfiggitsync is not configured yet!!!', 1677369373);
         }
     }
 
     public function getHost(): string
     {
-        $uri = parse_url($this->config['gitlabserver']);
+        $uri = \parse_url($this->config['gitlabserver']);
         if (isset($uri['host']) && isset($uri['scheme'])) {
             return $uri['scheme'] . '://' . $uri['host'] . '/';
         }
@@ -63,7 +56,7 @@ class GitlabApiService implements GitApiServiceInterface
     }
     public function getProject(): string
     {
-        return trim((string)parse_url($this->config['gitlabserver'], PHP_URL_PATH), '/');
+        return trim((string)\parse_url($this->config['gitlabserver'], PHP_URL_PATH), '/');
     }
 
     public function getBranches(): array
@@ -109,14 +102,14 @@ class GitlabApiService implements GitApiServiceInterface
 
     public function getBranchName(string $identifier): string
     {
-        return sprintf($this->config['branch_naming_template'], $identifier);
+        return \sprintf($this->config['branch_naming_template'], $identifier);
     }
 
     public function getAuthor(): array
     {
         $author = [
-            'username'=>'unknown',
-            'email'=>'n/a',
+            'username' => 'unknown',
+            'email' => 'n/a',
         ];
         if ($GLOBALS['BE_USER'] instanceof BackendUserAuthentication) {
             $uid = $GLOBALS['BE_USER']->getOriginalUserIdWhenInSwitchUserMode();
@@ -139,14 +132,14 @@ class GitlabApiService implements GitApiServiceInterface
     public function getCommitMessage(string $identifier, string $addtional_info = ''): string
     {
         $author = $this->getAuthor();
-        $username = sprintf('%s (%s)', $author['username'], $author['email']);
-        return sprintf($this->config['commit_message'], $identifier, $username, $addtional_info);
+        $username = \sprintf('%s (%s)', $author['username'], $author['email']);
+        return \sprintf($this->config['commit_message'], $identifier, $username, $addtional_info);
     }
     public function getMergeRequestMessage(string $identifier, string $addtional_info = ''): string
     {
         $author = $this->getAuthor();
-        $username = sprintf('%s (%s)', $author['username'], $author['email']);
-        return sprintf($this->config['mergerequest_message'], $identifier, $username, $addtional_info);
+        $username = \sprintf('%s (%s)', $author['username'], $author['email']);
+        return \sprintf($this->config['mergerequest_message'], $identifier, $username, $addtional_info);
     }
 
     public function createBranch(string $newbranch): bool
@@ -160,7 +153,7 @@ class GitlabApiService implements GitApiServiceInterface
             $client->repositories()->createBranch($this->getProject(), $newbranch, $frombranch);
         } catch (ValidationFailedException $e) {
             // ok, it exists ?
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             // other error ?
             return false;
         }
@@ -177,7 +170,7 @@ class GitlabApiService implements GitApiServiceInterface
         try {
             $raw = $client->repositoryFiles()->getRawFile($this->getProject(), $oldfilename, $branch);
         } catch (RuntimeException $e) {
-            return $this->commitFile($newfilename, (string)file_get_contents(Environment::getProjectPath() . '/' . $newfilename), $commitmessage, $branch);
+            return $this->commitFile($newfilename, (string)\file_get_contents(Environment::getProjectPath() . '/' . $newfilename), $commitmessage, $branch);
         }
         $author = $this->getAuthor();
 
@@ -194,15 +187,15 @@ class GitlabApiService implements GitApiServiceInterface
             //            'author_email'=>$author['email'],
             //            'author_name'=>$author['username'],
             //        ] );
-            $this->commitFile($newfilename, (string)file_get_contents(Environment::getProjectPath() . '/' . $newfilename), $commitmessage, $branch);
+            $this->commitFile($newfilename, (string)\file_get_contents(Environment::getProjectPath() . '/' . $newfilename), $commitmessage, $branch);
             $client->repositoryFiles()->deleteFile($this->getProject(), [
-                'file_path'=>$oldfilename,
-                'branch'=>$branch,
-                'commit_message'=>$commitmessage,
-                'author_email'=>$author['email'],
-                'author_name'=>$author['username'],
+                'file_path' => $oldfilename,
+                'branch' => $branch,
+                'commit_message' => $commitmessage,
+                'author_email' => $author['email'],
+                'author_name' => $author['username'],
             ]);
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             return false;
         }
 
@@ -222,7 +215,7 @@ class GitlabApiService implements GitApiServiceInterface
                 'author_email'   => $author['email'],
                 'author_name'    => $author['username'],
             ]);
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             return false;
         }
         return true;
@@ -242,12 +235,12 @@ class GitlabApiService implements GitApiServiceInterface
         $author = $this->getAuthor();
 
         $payload = [
-            'file_path'=> $filename,
-            'branch'=>$branch,
-            'content'=>$filecontent,
-            'commit_message'=>$commitmessage,
-            'author_email'=>$author['email'],
-            'author_name'=>$author['username'],
+            'file_path' => $filename,
+            'branch' => $branch,
+            'content' => $filecontent,
+            'commit_message' => $commitmessage,
+            'author_email' => $author['email'],
+            'author_name' => $author['username'],
         ];
 
         $result = null;
@@ -264,7 +257,7 @@ class GitlabApiService implements GitApiServiceInterface
         return is_array($result) && $result['file_path'] === $filename;
     }
 
-    public function createMergeRequest(string $identifier, string $branch, string $additional_info=''): void
+    public function createMergeRequest(string $identifier, string $branch, string $additional_info = ''): void
     {
         try {
             $client = $this->connect();
@@ -293,7 +286,7 @@ class GitlabApiService implements GitApiServiceInterface
 
         $membersRaw = $client->projects()->members($this->getProject());
         foreach ($membersRaw as $member) {
-            if ($member['access_level'] >= 30 && $member['state']==='active') {
+            if ($member['access_level'] >= 30 && $member['state'] === 'active') {
                 $members[] = [
                     'id'       => $member['id'],
                     'username' => $member['username'],
@@ -318,6 +311,6 @@ class GitlabApiService implements GitApiServiceInterface
                 throw $e;
             }
         }
-        return array_merge_recursive($members, $groupMembers);
+        return \array_merge_recursive($members, $groupMembers);
     }
 }

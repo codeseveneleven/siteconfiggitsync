@@ -17,7 +17,6 @@ namespace Code711\SiteConfigGitSync\Backend;
 
 use Code711\SiteConfigGitSync\Factory\GitApiServiceFactory;
 use Gitlab\Exception\RuntimeException;
-use InvalidArgumentException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
@@ -51,7 +50,7 @@ class ProjectMemberList
                 $out .=  '</select>';
             } catch (RuntimeException $e) {
                 $out = '<p>Git Server says: ' . $e->getMessage() . '</p>';
-            } catch (InvalidArgumentException $e) {
+            } catch (\InvalidArgumentException $e) {
                 $out = '<p>' . $e->getMessage() . '</p>';
             }
         }
