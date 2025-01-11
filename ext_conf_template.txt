@@ -1,4 +1,7 @@
-# cat=basic//10; type=string; label=Gitlab URL to the repository (https//git.mycompany.com/customer/sitepackage)
+# cat=basic//07; type=options[Gitlab=gitlab,Github=github]; label=GIT Service
+gitservice = gitlab
+
+# cat=basic//10; type=string; label=Git URL to the repository (https//git.mycompany.com/customer/sitepackage)
 gitlabserver =
 
 # cat=basic//20; type=string; label=Gitlab API Auth token

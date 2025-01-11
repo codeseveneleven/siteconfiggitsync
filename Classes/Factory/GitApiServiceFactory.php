@@ -15,14 +15,23 @@ declare(strict_types=1);
 
 namespace Code711\SiteConfigGitSync\Factory;
 
+use Code711\SiteConfigGitSync\Domain\Service\GithubApiService;
 use Code711\SiteConfigGitSync\Domain\Service\GitlabApiService;
 use Code711\SiteConfigGitSync\Interfaces\GitApiServiceInterface;
+use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class GitApiServiceFactory
 {
     public static function get(): GitApiServiceInterface
     {
-        return GeneralUtility::makeInstance(GitlabApiService::class);
+        $config = GeneralUtility::makeInstance(ExtensionConfiguration::class)->get('siteconfiggitsync');
+
+        $service = $config['gitservice'] ?? 'gitlab';
+
+        return match ($service) {
+            'gitlab' => GeneralUtility::makeInstance(GitlabApiService::class),
+            'github' => GeneralUtility::makeInstance(GithubApiService::class),
+        };
     }
 }
