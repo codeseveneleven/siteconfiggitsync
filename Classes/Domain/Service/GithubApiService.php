@@ -169,8 +169,27 @@ class GithubApiService implements GitApiServiceInterface
 
     public function createBranch(string $newbranch): bool
     {
-        // TODO: Implement createBranch() method.
-        return false;
+        if ($this->hasBranch($newbranch)) {
+            return true;
+        }
+        $frombranch = $this->getBranch($this->config['main_branch']);
+        $client = $this->connect();
+        try {
+            $client->api('repo')->create(
+                $this->getHost(),
+                $this->getProject(),
+                [
+                    'ref' => 'refs/heads/' . $newbranch,
+                    'sha' => $frombranch['commit']['sha'],
+                ]
+            );
+        } catch (\Exception $e) {
+            // other error ?
+            return false;
+        }
+        $this->branchescache = [];
+        $this->getBranches();
+        return true;
     }
 
     public function moveFile(string $oldfilename, string $newfilename, string $commitmessage, string $branch): bool
@@ -187,6 +206,10 @@ class GithubApiService implements GitApiServiceInterface
 
     public function commitFile(string $filename, string $filecontent, string $commitmessage, string $branch): bool
     {
+
+        $client = $this->connect();
+        //$client->api('repo')
+
         // TODO: Implement commitFile() method.
         return false;
     }
