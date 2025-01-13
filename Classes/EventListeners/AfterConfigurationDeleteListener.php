@@ -23,7 +23,7 @@ class AfterConfigurationDeleteListener
 {
     public function __invoke(AfterSiteConfigurationDeleteEvent $event)
     {
-        if (Environment::getContext()->isProduction()) {
+        if (Environment::getContext()->isProduction() || Environment::getContext()->isDevelopment()) {
             try {
                 $siteIdentifier = $event->getSiteIdentifier();
                 $configFileName = 'config.yaml';

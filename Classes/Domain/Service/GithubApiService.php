@@ -23,11 +23,11 @@ use Github\Api\PullRequest;
 use Github\Api\Repository\Contents;
 use Github\AuthMethod;
 use Github\Client;
-use Github\Exception\RuntimeException;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Context\Context;
+use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class GithubApiService implements GitApiServiceInterface
@@ -197,30 +197,61 @@ class GithubApiService implements GitApiServiceInterface
 
     public function moveFile(string $oldfilename, string $newfilename, string $commitmessage, string $branch): bool
     {
-        // TODO: Implement moveFile() method.
+        $oldfilename = trim($oldfilename, '/');
+        $newfilename = trim($newfilename, '/');
+
+        [ $oldraw, $oldmeta ] = $this->getFile($oldfilename, $branch);
+        //[ $newraw, $newmeta ] = $this->getFile($newfilename, $branch);
+
+        if ($oldraw === null) {
+            return $this->commitFile($newfilename, (string)\file_get_contents(Environment::getProjectPath() . '/' . $newfilename), $commitmessage, $branch);
+        }
+
+        try {
+            if (!$this->commitFile($newfilename, (string)\file_get_contents(Environment::getProjectPath() . '/' . $newfilename), $commitmessage, $branch)) {
+                return false;
+            }
+            return $this->deleteFile($oldfilename, $branch, $commitmessage);
+
+        } catch (\Exception $e) {
+            $x = 1;
+        }
         return false;
     }
 
     public function deleteFile(string $filename, string $branch, string $commitmessage): bool
     {
-        // TODO: Implement deleteFile() method.
+        try {
+            $filename = trim($filename, '/');
+            $client  = $this->connect();
+            /** @var Contents $content */
+            $content = $client->api('repo')->contents();
+            if ($content->exists($this->getHost(), $this->getProject(), $filename, 'refs/heads/' . $branch)) {
+
+                $meta = $content->show($this->getHost(), $this->getProject(), $filename, 'refs/heads/' . $branch);
+
+                $client  = $this->connect();
+                /** @var Contents $content */
+                $content = $client->api('repo')->contents();
+
+                $result = $content->rm($this->getHost(), $this->getProject(), $filename, $commitmessage, $meta['sha'], 'refs/heads/' . $branch);
+                return true;
+            }
+        } catch (\Exception $e) {
+            $x = 1;
+        }
         return false;
     }
 
     public function commitFile(string $filename, string $filecontent, string $commitmessage, string $branch): bool
     {
-
         $filename = trim($filename, '/');
+
+        [ $raw, $oldfile ] = $this->getFile($filename, $branch);
+
         $client = $this->connect();
         /** @var Contents $content */
         $content = $client->api('repo')->contents();
-        $raw = null;
-        if ($content->exists($this->getHost(), $this->getProject(), $filename, 'refs/heads/' . $branch)) {
-            $oldfile = $content->show($this->getHost(), $this->getProject(), $filename, 'refs/heads/' . $branch);
-            $raw = $content->rawDownload($this->getHost(), $this->getProject(), $filename, 'refs/heads/' . $branch);
-        }
-
-        $author = $this->getAuthor();
 
         $result = null;
         if ($raw) {
@@ -288,26 +319,6 @@ class GithubApiService implements GitApiServiceInterface
     {
         $members = [];
         $client = $this->connect();
-        /*
-
-        $me = $client->api('me')->show();
-        $me['username'] = $me['login'];
-        $members[] = $me;
-        $remotemembers = [];
-        try {
-            $remotemembers = $client->api('members')->all($this->getHost());
-        } catch (RuntimeException $e) {
-            // ignore, probably personal user space
-        }
-
-        foreach ($remotemembers as $member) {
-            if (!isset($member['name'])) {
-                $member['name'] = $member['login'];
-            }
-            $member['username'] = $member['login'];
-            $members[] = $member;
-        }
-        */
 
         /** @var Issue $issues */
         $issues   = $client->api('issues');
@@ -318,5 +329,26 @@ class GithubApiService implements GitApiServiceInterface
             $members[] = $user;
         }
         return $members;
+    }
+
+    /**
+     * @param Contents $content
+     * @param string $filename
+     * @param string $branch
+     *
+     * @return array
+     */
+    private function getFile(string $filename, string $branch): array
+    {
+        $raw = null;
+        $meta = [];
+        $client = $this->connect();
+        /** @var Contents $content */
+        $content = $client->api('repo')->contents();
+        if ($content->exists($this->getHost(), $this->getProject(), $filename, 'refs/heads/' . $branch)) {
+            $meta = $content->show($this->getHost(), $this->getProject(), $filename, 'refs/heads/' . $branch);
+            $raw     = $content->rawDownload($this->getHost(), $this->getProject(), $filename, 'refs/heads/' . $branch);
+        }
+        return [ $raw, $meta ];
     }
 }

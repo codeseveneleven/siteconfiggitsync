@@ -23,7 +23,7 @@ class AfterConfigurationRenameListener
 {
     public function __invoke(AfterSiteConfigurationRenameEvent $event): void
     {
-        if (Environment::getContext()->isProduction()) {
+        if (Environment::getContext()->isProduction() || Environment::getContext()->isDevelopment()) {
             try {
                 $currentIdentifier = $event->getCurrentIdentifier();
                 $newIdentifier = $event->getNewIdentifier();
