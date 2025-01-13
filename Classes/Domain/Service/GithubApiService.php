@@ -17,6 +17,10 @@ namespace Code711\SiteConfigGitSync\Domain\Service;
 
 use Code711\SiteConfigGitSync\Interfaces\GitApiServiceInterface;
 
+use Github\Api\GitData\References;
+use Github\Api\Issue;
+use Github\Api\PullRequest;
+use Github\Api\Repository\Contents;
 use Github\AuthMethod;
 use Github\Client;
 use Github\Exception\RuntimeException;
@@ -175,14 +179,13 @@ class GithubApiService implements GitApiServiceInterface
         $frombranch = $this->getBranch($this->config['main_branch']);
         $client = $this->connect();
         try {
-            $client->api('repo')->create(
-                $this->getHost(),
-                $this->getProject(),
-                [
-                    'ref' => 'refs/heads/' . $newbranch,
-                    'sha' => $frombranch['commit']['sha'],
-                ]
-            );
+            /** @var References $references */
+            $references = $client->api('git')->references();
+            $result = $references->create($this->getHost(), $this->getProject(), [
+                'ref' => 'refs/heads/' . $newbranch,
+                'sha' => $frombranch['commit']['sha'],
+            ]);
+
         } catch (\Exception $e) {
             // other error ?
             return false;
@@ -207,16 +210,75 @@ class GithubApiService implements GitApiServiceInterface
     public function commitFile(string $filename, string $filecontent, string $commitmessage, string $branch): bool
     {
 
+        $filename = trim($filename, '/');
         $client = $this->connect();
-        //$client->api('repo')
+        /** @var Contents $content */
+        $content = $client->api('repo')->contents();
+        $raw = null;
+        if ($content->exists($this->getHost(), $this->getProject(), $filename, 'refs/heads/' . $branch)) {
+            $oldfile = $content->show($this->getHost(), $this->getProject(), $filename, 'refs/heads/' . $branch);
+            $raw = $content->rawDownload($this->getHost(), $this->getProject(), $filename, 'refs/heads/' . $branch);
+        }
 
-        // TODO: Implement commitFile() method.
-        return false;
+        $author = $this->getAuthor();
+
+        $result = null;
+        if ($raw) {
+            // update
+            if ($raw !== $filecontent) {
+                $result = $content->update($this->getHost(), $this->getProject(), $filename, $filecontent, $commitmessage, $oldfile['sha'], 'refs/heads/' . $branch);
+
+            }
+        } else {
+            //create
+            $result = $content->create($this->getHost(), $this->getProject(), $filename, $filecontent, $commitmessage, 'refs/heads/' . $branch);
+        }
+
+        return is_array($result) && $result['content']['path'] === $filename;
+
     }
 
     public function createMergeRequest(string $identifier, string $branch, string $additional_info = ''): void
     {
-        // TODO: Implement createMergeRequest() method.
+        try {
+            $client = $this->connect();
+            /** @var PullRequest $pr */
+            $pr = $client->api('pr');
+
+            $payload = [
+                'title' => $this->getMergeRequestMessage($identifier, $additional_info),
+                'body' => 'updates from site',
+                'head' => 'refs/heads/' . $branch,
+                'base' => $this->config['main_branch'],
+            ];
+
+            //if ((int)$this->config['mergerequest_assign'] > 0) {
+            //    $payload['assignee_id'] = (int)$this->config['mergerequest_assign'];
+            //}
+            $result = $pr->create($this->getHost(), $this->getProject(), $payload);
+
+            if ((int)$this->config['mergerequest_assign'] > 0) {
+
+                /** @var Issue $issues */
+                $issues   = $client->api('issues');
+                $possible = $issues->assignees()->listAvailable($this->getHost(), $this->getProject());
+                foreach ($possible as $user) {
+                    if ($user['id'] === (int)$this->config['mergerequest_assign']) {
+                        $issues->assignees()->add($this->getHost(), $this->getProject(), $result['number'], [
+                            'assignees' => [
+                                $user['login'],
+                            ],
+                        ]);
+                    }
+                }
+
+            }
+
+            $x = 1;
+        } catch (\Exception $e) {
+            // allready exists
+            $x = 1;
+        }
     }
 
     /**
@@ -226,6 +288,8 @@ class GithubApiService implements GitApiServiceInterface
     {
         $members = [];
         $client = $this->connect();
+        /*
+
         $me = $client->api('me')->show();
         $me['username'] = $me['login'];
         $members[] = $me;
@@ -243,7 +307,16 @@ class GithubApiService implements GitApiServiceInterface
             $member['username'] = $member['login'];
             $members[] = $member;
         }
+        */
 
+        /** @var Issue $issues */
+        $issues   = $client->api('issues');
+        $possible = $issues->assignees()->listAvailable($this->getHost(), $this->getProject());
+        foreach ($possible as $user) {
+            $user['name'] = $user['login'];
+            $user['username'] = $user['login'];
+            $members[] = $user;
+        }
         return $members;
     }
 }
