@@ -2,8 +2,6 @@
 
 [![Latest Stable Version](https://poser.pugx.org/code711/siteconfiggitsync/v/stable.svg)](https://extensions.typo3.org/code711/siteconfiggitsync/)
 [![TYPO3 13](https://img.shields.io/badge/TYPO3-13-orange.svg)](https://get.typo3.org/version/12)
-[![TYPO3 12](https://img.shields.io/badge/TYPO3-12-orange.svg)](https://get.typo3.org/version/12)
-[![TYPO3 11](https://img.shields.io/badge/TYPO3-11-orange.svg)](https://get.typo3.org/version/11)
 [![Total Downloads](https://poser.pugx.org/code711/siteconfiggitsync/d/total.svg)](https://packagist.org/packages/code711/siteconfiggitsync)
 [![Monthly Downloads](https://poser.pugx.org/code711/siteconfiggitsync/d/monthly)](https://packagist.org/packages/code711/siteconfiggitsync)
 ![PHPSTAN:Level 9](https://img.shields.io/badge/PHPStan-level%208-brightgreen.svg?style=flat])
@@ -16,6 +14,13 @@ This extension aims to alleviate this problem by pushing those changes back to y
 There is no git binary on the server needed, everything is done through the GitLab API. Right now only GitLab is supported, but it can be selfhosted or on gitlab.com.
 
 ## Changelog
+
+### 2.0.0
+- deprecated TYPO3 11 support
+- deprecated TYPO3 12 Support
+- added Eventlistener for writing settings.yaml
+- added support for moving settings.yaml
+- added support for deleting settings.yaml
 
 #### 1.1.0
 - added GitHUB support
