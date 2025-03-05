@@ -8,19 +8,5 @@ services:
   Code711\SiteConfigGitSync\:
     resource: '../Classes/*'
 
-  Code711\SiteConfigGitSync\EventListeners\AfterConfigurationWriteListener:
-    tags:
-      - name: event.listener
-        identifier: 'pushSiteConfigToGitAfterWrite'
-
-  Code711\SiteConfigGitSync\EventListeners\AfterConfigurationRenameListener:
-    tags:
-      - name: event.listener
-        identifier: 'pushSiteConfigToGitAfterRename'
-
-  Code711\SiteConfigGitSync\EventListeners\AfterConfigurationDeleteListener:
-    tags:
-      - name: event.listener
-        identifier: 'pushSiteConfigToGitAfterDelete'
 
 

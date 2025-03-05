@@ -17,38 +17,54 @@ namespace Code711\SiteConfigGitSync\EventListeners;
 
 use Code711\SiteConfigGitSync\Factory\GitApiServiceFactory;
 use Code711\SiteConfigurationEvents\Events\AfterSiteConfigurationRenameEvent;
+use TYPO3\CMS\Core\Attribute\AsEventListener;
 use TYPO3\CMS\Core\Core\Environment;
 
+#[AsEventListener(
+    identifier: 'siteconfiggitsync/pushSiteConfigToGitAfterRename'
+)]
 class AfterConfigurationRenameListener
 {
+    public const CONFIG = 'config.yaml';
+    public const SETTINGS = 'settings.yaml';
+
     public function __invoke(AfterSiteConfigurationRenameEvent $event): void
     {
-        if (Environment::getContext()->isProduction() || Environment::getContext()->isDevelopment()) {
-            try {
-                $currentIdentifier = $event->getCurrentIdentifier();
-                $newIdentifier = $event->getNewIdentifier();
-                $configFileName = 'config.yaml';
-                $path = Environment::getConfigPath() . '/sites';
+        //if (Environment::getContext()->isProduction() || Environment::getContext()->isDevelopment()) {
+        try {
+            $currentIdentifier = $event->getCurrentIdentifier();
+            $newIdentifier = $event->getNewIdentifier();
+            $path = Environment::getConfigPath() . '/sites';
 
-                $folderOld   = $path . '/' . $currentIdentifier;
-                $fileNameOld = $folderOld . '/' . $configFileName;
-                $folderNew   = $path . '/' . $newIdentifier;
-                $fileNameNew = $folderNew . '/' . $configFileName;
+            $folderOld   = $path . '/' . $currentIdentifier;
+            $fileNameOld = $folderOld . '/' . self::CONFIG;
+            $settingsFileNameOld = $folderOld . '/' . self::SETTINGS;
 
-                $git     = GitApiServiceFactory::get();
-                $branch  = $git->getBranchName($newIdentifier);
-                $message = $git->getCommitMessage($newIdentifier, 'rename site identifier');
+            $folderNew   = $path . '/' . $newIdentifier;
+            $fileNameNew = $folderNew . '/' . self::CONFIG;
+            $settingsFileNameNew = $folderNew . '/' . self::SETTINGS;
 
-                if ($git->createBranch($branch)) {
-                    $filebaseOld = \str_replace(Environment::getProjectPath(), '', $fileNameOld);
-                    $filebaseNew = \str_replace(Environment::getProjectPath(), '', $fileNameNew);
+            $git     = GitApiServiceFactory::get();
+            $branch  = $git->getBranchName($newIdentifier);
+            $message = $git->getCommitMessage($newIdentifier, 'rename site identifier');
 
-                    if ($git->moveFile($filebaseOld, $filebaseNew, $message, $branch)) {
-                        $git->createMergeRequest($newIdentifier, $branch, 'rename site identifier');
-                    }
+            if ($git->createBranch($branch)) {
+
+                if (is_file($settingsFileNameOld) || is_file($settingsFileNameNew)) {
+                    $settingsFilebaseOld = \str_replace(Environment::getProjectPath(), '', $settingsFileNameOld);
+                    $settingsFilebaseNew = \str_replace(Environment::getProjectPath(), '', $settingsFileNameNew);
+                    $git->moveFile($settingsFilebaseOld, $settingsFilebaseNew, $message, $branch);
                 }
-            } catch (\InvalidArgumentException $e) {
+
+                $filebaseOld = \str_replace(Environment::getProjectPath(), '', $fileNameOld);
+                $filebaseNew = \str_replace(Environment::getProjectPath(), '', $fileNameNew);
+
+                if ($git->moveFile($filebaseOld, $filebaseNew, $message, $branch)) {
+                    $git->createMergeRequest($newIdentifier, $branch, 'rename site identifier');
+                }
             }
+        } catch (\InvalidArgumentException $e) {
         }
     }
+    //}
 }

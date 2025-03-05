@@ -23,6 +23,7 @@ use Github\Api\PullRequest;
 use Github\Api\Repository\Contents;
 use Github\AuthMethod;
 use Github\Client;
+use Github\Exception\RuntimeException;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
@@ -69,7 +70,11 @@ class GithubApiService implements GitApiServiceInterface
     {
         if (empty($this->branchescache)) {
             $client = $this->connect();
-            $branches = $client->api('repo')->branches($this->getHost(), $this->getProject());
+            try {
+                $branches = $client->api('repo')->branches($this->getHost(), $this->getProject());
+            } catch (RuntimeException $exception) {
+                return [];
+            }
 
             foreach ($branches as $branch) {
                 $branch['commit']['created_at'] = $branch['commit']['sha'];

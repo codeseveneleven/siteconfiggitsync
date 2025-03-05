@@ -1,0 +1,6 @@
+name: code711/siteconfiggitsync
+label: Siteconfig Git Sync Test Site Set
+
+settings:
+  siteconfiggitsync:
+    example: test

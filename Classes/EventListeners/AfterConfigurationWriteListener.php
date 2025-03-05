@@ -19,11 +19,16 @@ use Code711\SiteConfigGitSync\Factory\GitApiServiceFactory;
 use Code711\SiteConfigurationEvents\Events\AfterSiteConfigurationWriteEvent;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
+use TYPO3\CMS\Core\Attribute\AsEventListener;
 use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Messaging\FlashMessage;
 use TYPO3\CMS\Core\Messaging\FlashMessageService;
+use TYPO3\CMS\Core\Type\ContextualFeedbackSeverity;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
+#[AsEventListener(
+    identifier: 'siteconfiggitsync/pushSiteConfigToGitAfterWrite'
+)]
 class AfterConfigurationWriteListener implements LoggerAwareInterface
 {
     use LoggerAwareTrait;
@@ -53,7 +58,7 @@ class AfterConfigurationWriteListener implements LoggerAwareInterface
                         FlashMessage::class,
                         $e->getMessage(),
                         '',
-                        FlashMessage::WARNING,
+                        ContextualFeedbackSeverity::WARNING,
                         true
                     );
                     $flashMessageService = GeneralUtility::makeInstance(FlashMessageService::class);

@@ -15,7 +15,7 @@ $EM_CONF['siteconfiggitsync'] = [
     'title' => '(Code711) Site Config Git Sync',
     'description' => 'This extension will push changes to the site config yaml files back to your GitLAB or GitHUB repository by creating a branch for the changes along with a merge-request. It is targeted towards automated CI/CD installations or sites in general where the site-config is git versioned. No local git binary or .git directory is needed. Requires EXT:siteconfigurationevents',
     'category' => 'plugin',
-    'version' => '1.1.0',
+    'version' => '2.0.0',
     'state' => 'stable',
     'clearcacheonload' => 1,
     'author' => 'Frank Berger',
@@ -23,8 +23,8 @@ $EM_CONF['siteconfiggitsync'] = [
     'author_company' => 'Code711, a label of Sudhaus7, B-Factor GmbH and 12bis3 GbR',
     'constraints' => [
         'depends' => [
-            'typo3' => '11.5.0-13.99.99',
-            'siteconfigurationevents' => '1.0.0-1.99.99',
+            'typo3' => '13.4.0-13.99.99',
+            'siteconfigurationevents' => '2.0.0-2.99.99',
         ],
         'conflicts' => [
         ],

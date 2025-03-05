@@ -1,0 +1,11 @@
+categories:
+  SiteconfiggitsyncExample:
+    label: 'For Siteconfig Git Sync Testing'
+
+settings:
+  siteconfiggitsync.example:
+    label: 'Siteconfig git sync'
+    category: 'SiteconfiggitsyncExample'
+    description: 'for testing'
+    type: string
+    default: 'test'
