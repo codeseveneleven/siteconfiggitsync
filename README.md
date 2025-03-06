@@ -116,4 +116,3 @@ Now press the "Save 'siteconfiggitsync' Configuration" button again, and you sho
 - this extension is marked beta because not all scenarios have been tested. This is a 'works' for me right now
 - The GitLab server must be reachable via http or https from the production server. The GitLab api implementation is using guzzlehttp, so a proxy configuration should be possible, but I have not looked into this yet. Help in this regard is welcome
 - it should be possible to add bitbucket support. This might be added at a later stage
-
