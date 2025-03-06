@@ -9,9 +9,9 @@
 
 Sometimes it is necessary for a TYPO3 project that the site-config yaml files are managed in git alongside the site-package. Those projects have the problem that site-admins can then not change settings in the site config without manually carrying those changes back over to the git repository in order for them not to be overriden with the next CI/CD run or publish.
 
-This extension aims to alleviate this problem by pushing those changes back to your gitlab instance automatically. In doing so the extension will create a branch, check in the changes that have been made and create a merge-request which you then can manage in gitlab without manually merging the yaml files. And you will be notified about the changes because of the merge-request.
+This extension aims to alleviate this problem by pushing those changes back to your GitLab instance automatically. In doing so the extension will create a branch, check in the changes that have been made and create a merge-request which you then can manage in GitLab without manually merging the yaml files. And you will be notified about the changes because of the merge-request.
 
-There is no git binary on the server needed, everything is done through the GitLab API. Right now only GitLab is supported, but it can be selfhosted or on gitlab.com.
+There is no git binary on the server needed, everything is done through the GitLab API. GitHub and GitLab (selfhosted or GitLab.com) are supported.
 
 ## Changelog
 
@@ -23,10 +23,10 @@ There is no git binary on the server needed, everything is done through the GitL
 - added support for deleting settings.yaml
 
 #### 1.1.0
-- added GitHUB support
+- added GitHub support
 
 #### 1.0.3
-- fixed issue [#1](https://github.com/codeseveneleven/siteconfiggitsync/issues/1)
+- fixed issue [#1](https://GitHub.com/codeseveneleven/siteconfiggitsync/issues/1)
 - fixed issue reading the user-list in the extension configuration interface when a project is not part of a group
 - added LoggerAwareInterface to AfterConfigurationWriteListener
 
@@ -42,13 +42,13 @@ Externalised the XCLASS of the SiteConfiguration Class to [EXT:siteconfiguration
 
 ## Setup / Installation
 
-### Gitlab token
+### GitLab token
 
 after installing this extension with <pre>composer req code711/siteconfiggitsync</pre> you will need to create an API Token in your GitLab Project Page with at least 'Developer' permissions.
 
 This is done in your GitLab in your Project under 'Settings->Access Token'. Developer Permissions are needed because only from this level on Branches can be created and Merge-requests can be issued.
 
-![Gitlab Backend](https://github.com/codeseveneleven/siteconfiggitsync/raw/main/Documentation/gitlab.png)
+![GitLab Backend](https://GitHub.com/codeseveneleven/siteconfiggitsync/raw/main/Documentation/GitLab.png)
 
 In the field 'Token name' enter something meaningfull for this task, as it will be written next to commits or merge-requests. For example 'External Site change from TYPO3'.
 
@@ -60,24 +60,24 @@ And for the scope select 'api'. The other scopes are not enough for the tasks we
 
 after pressing the 'Create project access token' button you will be given a series of alphanumeric character. Copy this string of character. This is your token.
 
-![New Token](https://github.com/codeseveneleven/siteconfiggitsync/raw/main/Documentation/newtoken.png)
+![New Token](https://GitHub.com/codeseveneleven/siteconfiggitsync/raw/main/Documentation/newtoken.png)
 
 
 
-### GitHUB token
+### GitHub token
 
 after installing this extension with <pre>composer req code711/siteconfiggitsync</pre> you will need to create an API Token in your GitLab Project Page with at least 'Developer' permissions.
 
-The setup for GitHUB is from TYPO3 Point of view the same as in the above Gitlab setup.
+The setup for GitHub is from TYPO3 Point of view the same as in the above GitLab setup.
 
 The main difference is how to access your ACCESS_TOKEN.
 
-In Github access tokens are always personal tied to a user. The token can be created inside an organisation or team, but it has to be created as a personal token by one of its members.
+In GitHub access tokens are always personal tied to a user. The token can be created inside an organisation or team, but it has to be created as a personal token by one of its members.
 
-To do that access your Github dashboard, and click on your profile Icon. Choose the entry "Settings". In the following page choose 'Developer Settings' on the left hand side of the screen. Finally open up the Option "Personal access tokens" and choose the option
+To do that access your GitHub dashboard, and click on your profile Icon. Choose the entry "Settings". In the following page choose 'Developer Settings' on the left hand side of the screen. Finally open up the Option "Personal access tokens" and choose the option
 "Fine-grained tokens"
 
-You should be here then  [Fine-grained personal access token](https://github.com/settings/personal-access-token)
+You should be here then  [Fine-grained personal access token](https://GitHub.com/settings/personal-access-token)
 
 If you don't see the organisation or team where your project is located you have to enrol the organisation or team once. This is done from the Organisation Overview screen by choosing "Settings" in to top menu and then "Personal access tokens" - here you will then be able to enrol your organisation. Once you've done that, return to the "Developer Settings" screen, your organisation will then be listed there.
 
@@ -93,11 +93,11 @@ save and store the token
 
 In your TYPO3 backend navigate to Settings->Extension Configuration and open the accordion for the siteconfiggitsync extension:
 
-![Extension Config](https://github.com/codeseveneleven/siteconfiggitsync/raw/main/Documentation/extensionconfig.png)
+![Extension Config](https://GitHub.com/codeseveneleven/siteconfiggitsync/raw/main/Documentation/extensionconfig.png)
 
-Choose 'gitlab' or 'github' in the service dropdown (v1.1)
+Choose 'GitLab' or 'GitHub' in the service dropdown (v1.1)
 
-In the field project url add the complete URL to your projects repository, without any .git. Just as it is in your browser. for example <pre>https://gitlab.com/mycompany/customerproject </pre> (same is true for github)
+In the field project url add the complete URL to your projects repository, without any .git. Just as it is in your browser. for example <pre>https://GitLab.com/mycompany/customerproject </pre> (same is true for GitHub)
 
 In the field API Auth Token enter the token you just generated.
 
@@ -114,6 +114,6 @@ Now press the "Save 'siteconfiggitsync' Configuration" button again, and you sho
 
 - renaming is not done with a git-move but with checking in a new file and removing the old one. The move operation did not work for me when developing this extension. This might be revisited later
 - this extension is marked beta because not all scenarios have been tested. This is a 'works' for me right now
-- The gitlab server must be reachable via http or https from the production server. The gitlab api implementation is using guzzlehttp, so a proxy configuration should be possible, but I have not looked into this yet. Help in this regard is welcome
+- The GitLab server must be reachable via http or https from the production server. The GitLab api implementation is using guzzlehttp, so a proxy configuration should be possible, but I have not looked into this yet. Help in this regard is welcome
 - it should be possible to add bitbucket support. This might be added at a later stage
 
