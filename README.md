@@ -48,7 +48,7 @@ after installing this extension with <pre>composer req code711/siteconfiggitsync
 
 This is done in your GitLab in your Project under 'Settings->Access Token'. Developer Permissions are needed because only from this level on Branches can be created and Merge-requests can be issued.
 
-![GitLab Backend](https://GitHub.com/codeseveneleven/siteconfiggitsync/raw/main/Documentation/GitLab.png)
+![GitLab Backend](https://GitHub.com/codeseveneleven/siteconfiggitsync/raw/main/Documentation/gitlab.png)
 
 In the field 'Token name' enter something meaningfull for this task, as it will be written next to commits or merge-requests. For example 'External Site change from TYPO3'.
 
