@@ -21,7 +21,7 @@ use TYPO3\CMS\Core\Core\Environment;
 
 class AfterConfigurationDeleteListener
 {
-    public function __invoke(AfterSiteConfigurationDeleteEvent $event)
+    public function __invoke(AfterSiteConfigurationDeleteEvent $event): void
     {
         if (Environment::getContext()->isProduction() || Environment::getContext()->isDevelopment()) {
             try {
