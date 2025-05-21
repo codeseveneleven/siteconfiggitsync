@@ -277,11 +277,19 @@ class GitlabApiService implements GitApiServiceInterface
             );
             if (isset($this->config['mergerequest_automerge']) && (bool)$this->config['mergerequest_automerge'] && isset($result['iid']) && $result['iid'] > 0) {
                 try {
-                    $mergeresult = $client->mergeRequests()->merge($this->getProject(), $result['iid'], [
-                        'auto_merge'                  => true,
-                        'squash'                      => true,
-                        'should_remove_source_branch' => true,
-                    ]);
+                    $mr = $result;
+                    $count = 0;
+                    while ($mr['merge_status'] === 'checking' && $count < 100) {
+                        $mr = $client->mergeRequests()->show($this->getProject(), $result['iid']);
+                        $count++;
+                    }
+                    if ($mr['merge_status'] === 'can_be_merged') {
+                        $mergeresult = $client->mergeRequests()->merge($this->getProject(), $result['iid'], [
+                            'auto_merge'                  => true,
+                            'squash'                      => true,
+                            'should_remove_source_branch' => true,
+                        ]);
+                    }
                 } catch (\Throwable $e) {
                 }
             }
