@@ -27,7 +27,7 @@ class AfterConfigurationDeleteListener
 {
     public const CONFIG = 'config.yaml';
     public const SETTINGS = 'settings.yaml';
-    public function __invoke(AfterSiteConfigurationDeleteEvent $event)
+    public function __invoke(AfterSiteConfigurationDeleteEvent $event): void
     {
         // if (Environment::getContext()->isProduction() || Environment::getContext()->isDevelopment()) {
         try {

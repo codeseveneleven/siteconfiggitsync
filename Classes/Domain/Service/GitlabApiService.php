@@ -59,8 +59,11 @@ class GitlabApiService implements GitApiServiceInterface
         return trim((string)\parse_url($this->config['gitlabserver'], PHP_URL_PATH), '/');
     }
 
-    public function getBranches(): array
+    public function getBranches(bool $purgecache = false): array
     {
+        if ($purgecache) {
+            $this->branchescache = [];
+        }
         if (empty($this->branchescache)) {
             $client = $this->connect();
 
@@ -272,6 +275,17 @@ class GitlabApiService implements GitApiServiceInterface
                 $this->getMergeRequestMessage($identifier, $additional_info),
                 $payload
             );
+            if (isset($this->config['mergerequest_automerge']) && (bool)$this->config['mergerequest_automerge'] && isset($result['iid']) && $result['iid'] > 0) {
+                try {
+                    $mergeresult = $client->mergeRequests()->merge($this->getProject(), $result['iid'], [
+                        'auto_merge'                  => true,
+                        'squash'                      => true,
+                        'should_remove_source_branch' => true,
+                    ]);
+                } catch (\Throwable $e) {
+                }
+            }
+
         } catch (RuntimeException $e) {
             // allready exists
         }

@@ -23,11 +23,19 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class GitApiServiceFactory
 {
+    public const SUPPORTEDSERVICES = [
+        'gitlab',
+        'github',
+    ];
+
     public static function get(): GitApiServiceInterface
     {
         $config = GeneralUtility::makeInstance(ExtensionConfiguration::class)->get('siteconfiggitsync');
 
-        $service = $config['gitservice'] ?? 'gitlab';
+        $service = 'gitlab';
+        if (\is_array($config) && isset($config['gitservice']) && \is_string($config['gitservice']) && \in_array($config['gitservice'], self::SUPPORTEDSERVICES)) {
+            $service = $config['gitservice'];
+        }
 
         return match ($service) {
             'gitlab' => GeneralUtility::makeInstance(GitlabApiService::class),

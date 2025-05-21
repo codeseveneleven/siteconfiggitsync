@@ -52,7 +52,9 @@ class AfterConfigurationWriteListener implements LoggerAwareInterface
                     }
                 }
             } catch (\InvalidArgumentException $e) {
-                $this->logger->alert($e->getMessage() . ' ' . $e->getCode());
+                if ($this->logger instanceof LoggerAwareInterface) {
+                    $this->logger->alert($e->getMessage() . ' ' . $e->getCode());
+                }
                 if (!Environment::isCli()) {
                     $message = GeneralUtility::makeInstance(
                         FlashMessage::class,
