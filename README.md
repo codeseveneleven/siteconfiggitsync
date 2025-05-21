@@ -1,12 +1,10 @@
 # TYPO3 Site config - git synchronisation
 
 [![Latest Stable Version](https://poser.pugx.org/code711/siteconfiggitsync/v/stable.svg)](https://extensions.typo3.org/code711/siteconfiggitsync/)
-[![TYPO3 13](https://img.shields.io/badge/TYPO3-13-orange.svg)](https://get.typo3.org/version/12)
 [![TYPO3 12](https://img.shields.io/badge/TYPO3-12-orange.svg)](https://get.typo3.org/version/12)
-[![TYPO3 11](https://img.shields.io/badge/TYPO3-11-orange.svg)](https://get.typo3.org/version/11)
 [![Total Downloads](https://poser.pugx.org/code711/siteconfiggitsync/d/total.svg)](https://packagist.org/packages/code711/siteconfiggitsync)
 [![Monthly Downloads](https://poser.pugx.org/code711/siteconfiggitsync/d/monthly)](https://packagist.org/packages/code711/siteconfiggitsync)
-![PHPSTAN:Level 9](https://img.shields.io/badge/PHPStan-level%208-brightgreen.svg?style=flat])
+![PHPSTAN:Level 8](https://img.shields.io/badge/PHPStan-level%208-brightgreen.svg?style=flat])
 ![build:passing](https://img.shields.io/badge/build-passing-brightgreen.svg?style=flat])
 
 Sometimes it is necessary for a TYPO3 project that the site-config yaml files are managed in git alongside the site-package. Those projects have the problem that site-admins can then not change settings in the site config without manually carrying those changes back over to the git repository in order for them not to be overriden with the next CI/CD run or publish.
@@ -16,6 +14,23 @@ This extension aims to alleviate this problem by pushing those changes back to y
 There is no git binary on the server needed, everything is done through the GitLab API. Right now only GitLab is supported, but it can be selfhosted or on gitlab.com.
 
 ## Changelog
+
+### 2.1.0
+- added new feature for automatic merge if possible
+- added config option in extension configuration to enable automatic merge
+
+
+### 1.2.0
+- added new feature for automatic merge if possible
+- added config option in extension configuration to enable automatic merge
+
+
+### 2.0.0
+- deprecated TYPO3 11 support
+- deprecated TYPO3 12 Support
+- added Eventlistener for writing settings.yaml
+- added support for moving settings.yaml
+- added support for deleting settings.yaml
 
 #### 1.1.0
 - added GitHUB support

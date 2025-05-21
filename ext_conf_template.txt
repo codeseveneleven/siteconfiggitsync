@@ -10,14 +10,17 @@ http_auth_token =
 # cat=basic//30; type=user[Code711\SiteConfigGitSync\Backend\BaseBranchSelector->render]; label=The production branch to create merge-requests from (e.q. main)
 main_branch =
 
-# cat=basic//40; type=string; label=Branch naming Template, sprintf wrapped. First argument is the site identifier
+# cat=basic//40; type=string; label=Branch naming Template, sprintf wrapped: First argument is the site identifier
 branch_naming_template = automated-siteconfig-update-%s
 
-# cat=basic//50; type=text; label=Commit message, sprintf wrapped. First argument is the site identifier, second argument is the username of the backend user doing the change if available, third argument additional information about the action performed
+# cat=basic//50; type=text; label=Commit message, sprintf wrapped: First argument is the site identifier, second argument is the username of the backend user doing the change if available, third argument additional information about the action performed
 commit_message = [skip ci] Site config %3$s in Site %1$s by %2$s
 
-# cat=basic//60; type=text; label=Merge request message, sprintf wrapped. First argument is the site identifier, second argument is the username of the backend user doing the change if available, third argument additional information about the action performed
+# cat=basic//60; type=text; label=Merge request message, sprintf wrapped: First argument is the site identifier, second argument is the username of the backend user doing the change if available, third argument additional information about the action performed
 mergerequest_message = [skip ci] Please merge site config %3$s in Site %1$s by %2$s
 
 # cat=basic//70; type=user[Code711\SiteConfigGitSync\Backend\ProjectMemberList->render]; label=Who to assign a merge request
 mergerequest_assign = 0
+
+# cat=basic//80; type=boolean; label=Automatically merge: If set the  created branch will try to automatically merge with squash and then delete the branch again. This will retain the history. If no automatic merge can be done the user will be notified about the merge request.
+mergerequest_automerge = 0

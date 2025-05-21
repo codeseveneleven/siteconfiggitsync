@@ -23,7 +23,7 @@ interface GitApiServiceInterface
     /**
      * @return array<int,array<string,mixed>>
      */
-    public function getBranches(): array;
+    public function getBranches(bool $purgecache = false): array;
 
     public function hasBranch(string $branch): bool;
     /**

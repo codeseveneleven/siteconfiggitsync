@@ -45,11 +45,16 @@ class ProjectMemberList
                 $out .= '<option value="0">do not assign to a user</option>';
 
                 foreach ($members as $member) {
+                    $selected = '';
+                    if (isset($config[$parameter['fieldName']]) && (int)$member['id'] === (int)$config[$parameter['fieldName']]) {
+                        $selected = 'selected';
+                    }
+
                     $out .= sprintf(
                         '<option value="%1$s" %3$s>%2$s</option>',
                         $member['id'],
                         $member['name'] . ' (' . $member['username'] . ')',
-                        (int)$member['id'] === (int)$config[$parameter['fieldName']] ? 'selected' : ''
+                        $selected
                     );
                 }
                 $out .=  '</select>';

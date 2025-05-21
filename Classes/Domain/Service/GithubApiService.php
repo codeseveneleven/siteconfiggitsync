@@ -17,12 +17,13 @@ namespace Code711\SiteConfigGitSync\Domain\Service;
 
 use Code711\SiteConfigGitSync\Interfaces\GitApiServiceInterface;
 
-use Github\Api\GitData\References;
+use Github\Api\GitData;
 use Github\Api\Issue;
 use Github\Api\PullRequest;
-use Github\Api\Repository\Contents;
+use Github\Api\Repo;
 use Github\AuthMethod;
 use Github\Client;
+use Github\Exception\RuntimeException;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
@@ -42,7 +43,6 @@ class GithubApiService implements GitApiServiceInterface
      */
     protected array $branchescache = [];
 
-    protected ?array $repository = null;
     public function __construct()
     {
         $this->config = GeneralUtility::makeInstance(ExtensionConfiguration::class)->get('siteconfiggitsync');
@@ -65,11 +65,20 @@ class GithubApiService implements GitApiServiceInterface
     /**
      * @inheritDoc
      */
-    public function getBranches(): array
+    public function getBranches(bool $purgecache = false): array
     {
+        if ($purgecache) {
+            $this->branchescache = [];
+        }
         if (empty($this->branchescache)) {
             $client = $this->connect();
-            $branches = $client->api('repo')->branches($this->getHost(), $this->getProject());
+            try {
+                /** @var Repo $repositry */
+                $repositry = $client->api('repo');
+                $branches = $repositry->branches($this->getHost(), $this->getProject());
+            } catch (RuntimeException $exception) {
+                return [];
+            }
 
             foreach ($branches as $branch) {
                 $branch['commit']['created_at'] = $branch['commit']['sha'];
@@ -108,7 +117,7 @@ class GithubApiService implements GitApiServiceInterface
     {
         $path = trim((string)\parse_url($this->config['gitlabserver'], PHP_URL_PATH), '/');
         $aPath = GeneralUtility::trimExplode('/', $path, true);
-        return array_pop($aPath);
+        return (string)array_pop($aPath);
     }
 
     /**
@@ -116,7 +125,7 @@ class GithubApiService implements GitApiServiceInterface
      */
     public function getBranch(string $branch): ?array
     {
-        $branches = $this->getBranches();
+        $branches = $this->getBranches(true);
         foreach ($branches as $gitbranch) {
             if ($gitbranch['name'] === $branch) {
                 return $gitbranch;
@@ -177,11 +186,14 @@ class GithubApiService implements GitApiServiceInterface
             return true;
         }
         $frombranch = $this->getBranch($this->config['main_branch']);
+        if (!isset($frombranch['commit']['sha'])) {
+            return false;
+        }
         $client = $this->connect();
         try {
-            /** @var References $references */
-            $references = $client->api('git')->references();
-            $result = $references->create($this->getHost(), $this->getProject(), [
+            /** @var GitData $api */
+            $api = $client->api('git');
+            $result = $api->references()->create($this->getHost(), $this->getProject(), [
                 'ref' => 'refs/heads/' . $newbranch,
                 'sha' => $frombranch['commit']['sha'],
             ]);
@@ -190,8 +202,8 @@ class GithubApiService implements GitApiServiceInterface
             // other error ?
             return false;
         }
-        $this->branchescache = [];
-        $this->getBranches();
+
+        $this->getBranches(true);
         return true;
     }
 
@@ -224,17 +236,24 @@ class GithubApiService implements GitApiServiceInterface
         try {
             $filename = trim($filename, '/');
             $client  = $this->connect();
-            /** @var Contents $content */
-            $content = $client->api('repo')->contents();
+
+            /** @var Repo $api */
+            $api = $client->api('repo');
+            $content = $api->contents();
             if ($content->exists($this->getHost(), $this->getProject(), $filename, 'refs/heads/' . $branch)) {
 
                 $meta = $content->show($this->getHost(), $this->getProject(), $filename, 'refs/heads/' . $branch);
 
-                $client  = $this->connect();
-                /** @var Contents $content */
-                $content = $client->api('repo')->contents();
-
-                $result = $content->rm($this->getHost(), $this->getProject(), $filename, $commitmessage, $meta['sha'], 'refs/heads/' . $branch);
+                if (isset($meta['sha'])) {
+                    $result = $content->rm(
+                        $this->getHost(),
+                        $this->getProject(),
+                        $filename,
+                        $commitmessage,
+                        $meta['sha'],
+                        'refs/heads/' . $branch
+                    );
+                }
                 return true;
             }
         } catch (\Exception $e) {
@@ -250,13 +269,15 @@ class GithubApiService implements GitApiServiceInterface
         [ $raw, $oldfile ] = $this->getFile($filename, $branch);
 
         $client = $this->connect();
-        /** @var Contents $content */
-        $content = $client->api('repo')->contents();
+
+        /** @var Repo $repositry */
+        $repositry = $client->api('repo');
+        $content = $repositry->contents();
 
         $result = null;
         if ($raw) {
             // update
-            if ($raw !== $filecontent) {
+            if ($raw !== $filecontent && isset($oldfile['sha'])) {
                 $result = $content->update($this->getHost(), $this->getProject(), $filename, $filecontent, $commitmessage, $oldfile['sha'], 'refs/heads/' . $branch);
 
             }
@@ -302,13 +323,33 @@ class GithubApiService implements GitApiServiceInterface
                         ]);
                     }
                 }
-
             }
 
-            $x = 1;
+            if (isset($this->config['mergerequest_automerge']) && (bool)$this->config['mergerequest_automerge'] && isset($result['number']) && $result['number'] > 0) {
+                try {
+                    $mergeresult = $pr->merge(
+                        $this->getHost(),
+                        $this->getProject(),
+                        $result['number'],
+                        'automatic merge',
+                        $result['head']['sha'],
+                        'squash'
+                    );
+                    if ($mergeresult['merged']) {
+                        /** @var GitData $git */
+                        $git = $client->api('git');
+                        $deleteresult = $git->references()->remove(
+                            $this->getHost(),
+                            $this->getProject(),
+                            'heads/' . $branch
+                        );
+                    }
+                } catch (\Throwable $e) {
+                    // can not merge
+                }
+            }
         } catch (\Exception $e) {
             // allready exists
-            $x = 1;
         }
     }
 
@@ -332,19 +373,20 @@ class GithubApiService implements GitApiServiceInterface
     }
 
     /**
-     * @param Contents $content
      * @param string $filename
      * @param string $branch
      *
-     * @return array
+     * @return array{0:array<mixed>|string|null,1:array<mixed>|string}
      */
     private function getFile(string $filename, string $branch): array
     {
         $raw = null;
         $meta = [];
         $client = $this->connect();
-        /** @var Contents $content */
-        $content = $client->api('repo')->contents();
+
+        /** @var Repo $repo */
+        $repo = $client->api('repo');
+        $content = $repo->contents();
         if ($content->exists($this->getHost(), $this->getProject(), $filename, 'refs/heads/' . $branch)) {
             $meta = $content->show($this->getHost(), $this->getProject(), $filename, 'refs/heads/' . $branch);
             $raw     = $content->rawDownload($this->getHost(), $this->getProject(), $filename, 'refs/heads/' . $branch);
