@@ -29,32 +29,32 @@ class AfterConfigurationDeleteListener
     public const SETTINGS = 'settings.yaml';
     public function __invoke(AfterSiteConfigurationDeleteEvent $event): void
     {
-        // if (Environment::getContext()->isProduction() || Environment::getContext()->isDevelopment()) {
-        try {
-            $siteIdentifier = $event->getSiteIdentifier();
-            $path = Environment::getConfigPath() . '/sites';
-            $folder   = $path . '/' . $siteIdentifier;
-            $fileName = $folder . '/' . self::CONFIG;
-            $settingsFileName = $folder . '/' . self::SETTINGS;
+        if ($this->isActive()) {
+            try {
+                $siteIdentifier = $event->getSiteIdentifier();
+                $path = Environment::getConfigPath() . '/sites';
+                $folder   = $path . '/' . $siteIdentifier;
+                $fileName = $folder . '/' . self::CONFIG;
+                $settingsFileName = $folder . '/' . self::SETTINGS;
 
-            $git     = GitApiServiceFactory::get();
-            $branch  = $git->getBranchName($siteIdentifier);
-            $message = $git->getCommitMessage($siteIdentifier, 'delete site');
-            if ($git->createBranch($branch)) {
+                $git     = GitApiServiceFactory::get();
+                $branch  = $git->getBranchName($siteIdentifier);
+                $message = $git->getCommitMessage($siteIdentifier, 'delete site');
+                if ($git->createBranch($branch)) {
 
-                if (is_file($settingsFileName)) {
-                    $filebase = \str_replace(Environment::getProjectPath(), '', $settingsFileName);
-                    $git->deleteFile($filebase, $branch, $message);
+                    if (is_file($settingsFileName)) {
+                        $filebase = \str_replace(Environment::getProjectPath(), '', $settingsFileName);
+                        $git->deleteFile($filebase, $branch, $message);
+                    }
+
+                    $filebase = \str_replace(Environment::getProjectPath(), '', $fileName);
+
+                    if ($git->deleteFile($filebase, $branch, $message)) {
+                        $git->createMergeRequest($siteIdentifier, $branch, 'delete site');
+                    }
                 }
-
-                $filebase = \str_replace(Environment::getProjectPath(), '', $fileName);
-
-                if ($git->deleteFile($filebase, $branch, $message)) {
-                    $git->createMergeRequest($siteIdentifier, $branch, 'delete site');
-                }
+            } catch (\InvalidArgumentException $e) {
             }
-        } catch (\InvalidArgumentException $e) {
         }
     }
-    //}
 }

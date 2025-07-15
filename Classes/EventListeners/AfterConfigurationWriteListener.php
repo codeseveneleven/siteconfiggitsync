@@ -16,6 +16,7 @@ declare(strict_types=1);
 namespace Code711\SiteConfigGitSync\EventListeners;
 
 use Code711\SiteConfigGitSync\Factory\GitApiServiceFactory;
+use Code711\SiteConfigGitSync\Traits\ExtensionIsActiveTrait;
 use Code711\SiteConfigurationEvents\Events\AfterSiteConfigurationWriteEvent;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
@@ -32,9 +33,10 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 class AfterConfigurationWriteListener implements LoggerAwareInterface
 {
     use LoggerAwareTrait;
+    use ExtensionIsActiveTrait;
     public function __invoke(AfterSiteConfigurationWriteEvent $event): void
     {
-        if (Environment::getContext()->isProduction() || Environment::getContext()->isDevelopment()) {
+        if ($this->isActive()) {
             try {
                 $siteIdentifier = $event->getSiteIdentifier();
                 $configFileName = 'config.yaml';
