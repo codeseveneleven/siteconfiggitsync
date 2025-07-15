@@ -15,6 +15,12 @@ There is no git binary on the server needed, everything is done through the GitL
 
 ## Changelog
 
+### 1.2.2
+
+Changed logic when the Eventhandlers actually act:
+  - if TYPO3 is in Production-mode
+  - if the Environment Variable SITECONFIGGITSYNC_ENABLE is set to 1
+
 ### 2.1.0
 - added new feature for automatic merge if possible
 - added config option in extension configuration to enable automatic merge

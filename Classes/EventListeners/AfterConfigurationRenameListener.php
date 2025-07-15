@@ -16,14 +16,16 @@ declare(strict_types=1);
 namespace Code711\SiteConfigGitSync\EventListeners;
 
 use Code711\SiteConfigGitSync\Factory\GitApiServiceFactory;
+use Code711\SiteConfigGitSync\Traits\ExtensionIsActiveTrait;
 use Code711\SiteConfigurationEvents\Events\AfterSiteConfigurationRenameEvent;
 use TYPO3\CMS\Core\Core\Environment;
 
 class AfterConfigurationRenameListener
 {
+    use ExtensionIsActiveTrait;
     public function __invoke(AfterSiteConfigurationRenameEvent $event): void
     {
-        if (Environment::getContext()->isProduction() || Environment::getContext()->isDevelopment()) {
+        if ($this->isActive()) {
             try {
                 $currentIdentifier = $event->getCurrentIdentifier();
                 $newIdentifier = $event->getNewIdentifier();
