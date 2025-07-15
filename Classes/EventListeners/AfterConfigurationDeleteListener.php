@@ -16,6 +16,7 @@ declare(strict_types=1);
 namespace Code711\SiteConfigGitSync\EventListeners;
 
 use Code711\SiteConfigGitSync\Factory\GitApiServiceFactory;
+use Code711\SiteConfigGitSync\Traits\ExtensionIsActiveTrait;
 use Code711\SiteConfigurationEvents\Events\AfterSiteConfigurationDeleteEvent;
 use TYPO3\CMS\Core\Attribute\AsEventListener;
 use TYPO3\CMS\Core\Core\Environment;
@@ -25,6 +26,7 @@ use TYPO3\CMS\Core\Core\Environment;
 )]
 class AfterConfigurationDeleteListener
 {
+    use ExtensionIsActiveTrait;
     public const CONFIG = 'config.yaml';
     public const SETTINGS = 'settings.yaml';
     public function __invoke(AfterSiteConfigurationDeleteEvent $event): void

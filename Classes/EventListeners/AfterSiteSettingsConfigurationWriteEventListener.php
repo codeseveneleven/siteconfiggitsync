@@ -16,6 +16,7 @@ declare(strict_types=1);
 namespace Code711\SiteConfigGitSync\EventListeners;
 
 use Code711\SiteConfigGitSync\Factory\GitApiServiceFactory;
+use Code711\SiteConfigGitSync\Traits\ExtensionIsActiveTrait;
 use Code711\SiteConfigurationEvents\Events\AfterSiteSettingsConfigurationWriteEvent;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
@@ -32,40 +33,43 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 class AfterSiteSettingsConfigurationWriteEventListener implements LoggerAwareInterface
 {
     use LoggerAwareTrait;
-
+    use ExtensionIsActiveTrait;
     public function __invoke(AfterSiteSettingsConfigurationWriteEvent $event): void
     {
-        try {
-            $siteIdentifier = $event->getSiteIdentifier();
-            $configFileName = 'settings.yaml';
-            $path = Environment::getConfigPath() . '/sites';
-            $folder   = $path . '/' . $siteIdentifier;
-            $fileName = $folder . '/' . $configFileName;
+        if ($this->isActive()) {
 
-            $git     = GitApiServiceFactory::get();
-            $branch  = $git->getBranchName($siteIdentifier);
-            $message = $git->getCommitMessage($siteIdentifier, 'create or update');
-            if ($git->createBranch($branch)) {
-                $filebase = \str_replace(Environment::getProjectPath(), '', $fileName);
-                if ($git->commitFile($filebase, (string)\file_get_contents($fileName), $message, $branch)) {
-                    $git->createMergeRequest($siteIdentifier, $branch, 'create or update');
+            try {
+                $siteIdentifier = $event->getSiteIdentifier();
+                $configFileName = 'settings.yaml';
+                $path           = Environment::getConfigPath() . '/sites';
+                $folder         = $path . '/' . $siteIdentifier;
+                $fileName       = $folder . '/' . $configFileName;
+
+                $git     = GitApiServiceFactory::get();
+                $branch  = $git->getBranchName($siteIdentifier);
+                $message = $git->getCommitMessage($siteIdentifier, 'create or update');
+                if ($git->createBranch($branch)) {
+                    $filebase = \str_replace(Environment::getProjectPath(), '', $fileName);
+                    if ($git->commitFile($filebase, (string)\file_get_contents($fileName), $message, $branch)) {
+                        $git->createMergeRequest($siteIdentifier, $branch, 'create or update');
+                    }
                 }
-            }
-        } catch (\InvalidArgumentException $e) {
-            if ($this->logger instanceof LoggerAwareInterface) {
-                $this->logger->alert($e->getMessage() . ' ' . $e->getCode());
-            }
-            if (!Environment::isCli()) {
-                $message = GeneralUtility::makeInstance(
-                    FlashMessage::class,
-                    $e->getMessage(),
-                    '',
-                    ContextualFeedbackSeverity::WARNING,
-                    true
-                );
-                $flashMessageService = GeneralUtility::makeInstance(FlashMessageService::class);
-                $messageQueue        = $flashMessageService->getMessageQueueByIdentifier();
-                $messageQueue->addMessage($message);
+            } catch (\InvalidArgumentException $e) {
+                if ($this->logger instanceof LoggerAwareInterface) {
+                    $this->logger->alert($e->getMessage() . ' ' . $e->getCode());
+                }
+                if (! Environment::isCli()) {
+                    $message             = GeneralUtility::makeInstance(
+                        FlashMessage::class,
+                        $e->getMessage(),
+                        '',
+                        ContextualFeedbackSeverity::WARNING,
+                        true
+                    );
+                    $flashMessageService = GeneralUtility::makeInstance(FlashMessageService::class);
+                    $messageQueue        = $flashMessageService->getMessageQueueByIdentifier();
+                    $messageQueue->addMessage($message);
+                }
             }
         }
     }
