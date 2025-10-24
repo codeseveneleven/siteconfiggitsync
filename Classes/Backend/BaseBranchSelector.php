@@ -44,7 +44,7 @@ class BaseBranchSelector
 
                 $out = sprintf('<select name="%1$s" id="em-%1$s">', $parameter['fieldName']);
                 foreach ($branches as $branch) {
-                    $out .= sprintf('<option value="%1$s" %3$s>%1$s (Last commit: %2$s)</option>', $branch['name'], $branch['commit']['created_at'], $branch['name'] === $parameter['fieldValue'] ? 'selected' : '');
+                    $out .= sprintf('<option value="%1$s" %3$s>%1$s (Last commit: %2$s)</option>', $branch['name'], $branch['commit']['created_at'], $branch['name'] === $config[$parameter['fieldName']] ? 'selected' : '');
                 }
                 $out .=  '</select>';
             } catch (RuntimeException $e) {
