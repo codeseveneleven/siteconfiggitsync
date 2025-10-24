@@ -15,6 +15,12 @@ There is no git binary on the server needed, everything is done through the GitL
 
 ## Changelog
 
+### 2.1.3
+
+Bugfix in extension configurator:
+
+- branch was not selected in dropdown
+
 ### 2.1.2 & 1.2.2
 
 Changed logic when the Eventhandlers actually act:
