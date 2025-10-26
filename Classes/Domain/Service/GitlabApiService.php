@@ -178,26 +178,27 @@ class GitlabApiService implements GitApiServiceInterface
         $author = $this->getAuthor();
 
         try {
-            //$client->repositories()->createCommit( $this->getProject(),  [
-            //            'branch'=>$branch,
-            //            'commit_message'=>$commitmessage,
-            //            'actions'=>[
-            //                'action'=>['move'],
-            //                'file_path'=> $newfilename,
-            //                'previous_path'=>$oldfilename,
-            //                'content'=> \file_get_contents( Environment::getProjectPath().'/'.$newfilename)
-            //            ],
-            //            'author_email'=>$author['email'],
-            //            'author_name'=>$author['username'],
-            //        ] );
-            $this->commitFile($newfilename, (string)\file_get_contents(Environment::getProjectPath() . '/' . $newfilename), $commitmessage, $branch);
-            $client->repositoryFiles()->deleteFile($this->getProject(), [
-                'file_path' => $oldfilename,
+            $client->repositories()->createCommit($this->getProject(), [
                 'branch' => $branch,
                 'commit_message' => $commitmessage,
+                'actions' => [
+                    [
+                        'action' => 'move',
+                        'file_path' => $newfilename,
+                        'previous_path' => $oldfilename,
+                    ],
+                ],
                 'author_email' => $author['email'],
                 'author_name' => $author['username'],
             ]);
+            //            $this->commitFile($newfilename, (string)\file_get_contents(Environment::getProjectPath() . '/' . $newfilename), $commitmessage, $branch);
+            //            $client->repositoryFiles()->deleteFile($this->getProject(), [
+            //                'file_path' => $oldfilename,
+            //                'branch' => $branch,
+            //                'commit_message' => $commitmessage,
+            //                'author_email' => $author['email'],
+            //                'author_name' => $author['username'],
+            //            ]);
         } catch (\Exception $e) {
             return false;
         }
